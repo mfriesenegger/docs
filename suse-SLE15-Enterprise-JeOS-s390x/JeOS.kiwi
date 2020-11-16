@@ -2,19 +2,21 @@
 
 <!-- OBS-Profiles: @BUILD_FLAVOR@ -->
 
-<image schemaversion="6.9" name="SLES15-SP1-JeOS" displayname="SLES 15 SP1">
+<image schemaversion="7.1" name="SLES15-SP2-JeOS" displayname="SLES 15 SP2">
     <description type="system">
         <author>SUSE Linux GmbH</author>
         <contact>mikef@suse.com</contact>
-        <specification>SUSE Linux Enterprise 15 SP1 JeOS</specification>
+        <specification>SUSE Linux Enterprise 15 SP2 JeOS</specification>
     </description>
     <profiles>
         <profile name="kvm" description="JeOS for KVM" arch="s390x"/>
-	<profile name="OpenStack-Cloud" description="JeOS for OpenStack Cloud" arch="s390x"/>
+        <profile name="kvm-firstboot" description="JeOS for KVM with firstboot" arch="s390x"/>
+	      <profile name="OpenStack-Cloud" description="JeOS for OpenStack Cloud" arch="s390x"/>
+        <profile name="oem-dasd" description="JeOS for DASD" arch="s390x"/>
     </profiles>
 
-    <preferences profiles="kvm,OpenStack-Cloud">
-        <version>15.1</version>
+    <preferences profiles="kvm,kvm-firstboot,OpenStack-Cloud">
+        <version>15.2</version>
         <packagemanager>zypper</packagemanager>
         <bootsplash-theme>SLE</bootsplash-theme>
         <bootloader-theme>SLE</bootloader-theme>
@@ -38,13 +40,40 @@
 	</type>
     </preferences>
 
+    <preferences profiles="oem-dasd">
+        <version>15.2</version>
+        <packagemanager>zypper</packagemanager>
+        <bootsplash-theme>SLE</bootsplash-theme>
+        <bootloader-theme>SLE</bootloader-theme>
+    <!-- those settings are applied by suseConfig in config.sh
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <hwclock>utc</hwclock>
+    -->
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <type
+          image="oem"
+          filesystem="xfs"
+          initrd_system="dracut"
+          bootloader="grub2_s390x_emu"
+          bootloader_console="serial"
+          kernelcmdline="dasd_mod.dasd=ipldev "
+          zipl_targettype="CDL"
+          devicepersistency="by-path"
+          target_blocksize="4096"
+     >
+             <size unit="M">1536</size>
+      </type>
+    </preferences>
+
     <!-- Only needed for images without cloud-init -->
-    <users profiles="kvm">
+    <users profiles="kvm,oem-dasd">
         <user name="root" home="/root" pwdformat="plain" password="root" groups="root" />
     </users>
 
-<!-- 
-Required SCC repos to build image: 
+<!--
+Required SCC repos to build image:
     SLE-Module-Basesystem Products
     SLE-Module-Basesystem Updates
     SLE-Module-Desktop-Applications Products
@@ -57,8 +86,8 @@ Required SCC repos to build image:
     SLE-Product-SLES Updates
     SLE-Module-Server-Applications Products
     SLE-Module-Server-Applications Updates
-    
-Use the following command on a registered SLES15 SP1 manually installed system to get SCC repository information:
+
+Use the following command on a registered SLES15 SP2 manually installed system to get SCC repository information:
         for list in $(zypper lr -E | grep SLE- | tr -d ' ' | cut -d'|' -f1); do URL=$(zypper lr -r ${list} | grep ^URI | tr -d ' ' | sed -e 's/URI\://'); echo "    <repository type=\"rpm-md\" >"; echo "    <source path='${URL}'/>"; echo "    </repository>"; done
 -->
 
@@ -91,20 +120,34 @@ Use the following command on a registered SLES15 SP1 manually installed system t
         <package name="systemd-sysvinit"/>
         <package name="timezone"/>
         <package name="wicked"/>
-        <package name="iproute2"/> 
+        <package name="iproute2"/>
         <package name="openssh"/>
         <package name="rsync"/>
         <package name="s390-tools"/>
         <package name="sudo"/>
         <package name="iptables"/>
-	<package name="wget"/> <!-- needed to register with smt -->
+	      <package name="wget"/> <!-- needed to register with smt -->
         <package name="xfsprogs" />
-        <package name="kernel-default-base"/>
+    </packages>
+
+    <packages type="image" profiles="kvm-firstboot">
+        <!-- Only if not cloud-init -->
+        <package name="jeos-firstboot"/>
+        <package name="fbiterm"/> <!-- Optionally used by jeos-firstboot for non-latin fonts -->
     </packages>
 
     <packages type="image" profiles="OpenStack-Cloud">
         <package name="cloud-init" />
         <package name="cloud-init-config-suse" />
+    </packages>
+
+    <packages type="image" profiles="kvm,OpenStack-Cloud">
+        <package name="kernel-default-base"/>
+    </packages>
+
+    <packages type="image" profiles="oem-dasd">
+        <package name="dracut-kiwi-oem-repart" />
+        <package name="kernel-default"/>
     </packages>
 
     <packages type="bootstrap">

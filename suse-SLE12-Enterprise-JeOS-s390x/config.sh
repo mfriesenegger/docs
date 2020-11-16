@@ -230,6 +230,15 @@ if [[ "$kiwi_profiles" == *"RaspberryPi"* ]]; then
 	netconfig update -f
 fi
 
+if [[ "$kiwi_profiles" == *"kvm"* ]]; then
+	#=================================================
+	# Fix efivars in /usr/lib/jeos-firstboot for s390x
+	#-------------------------------------------------
+	sed -i '/^run modprobe efivars$/i if modinfo efivars > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
+	sed -i '/^run modprobe efivars$/a fi' /usr/lib/jeos-firstboot
+	sed -i '/^run modprobe efivars$/c \\trun modprobe efivars' /usr/lib/jeos-firstboot
+fi
+
 # Not compatible with set -e
 baseCleanMount || true
 
