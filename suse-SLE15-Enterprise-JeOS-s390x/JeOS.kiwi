@@ -141,7 +141,7 @@ Use the following command on a registered SLES15 SP2 manually installed system t
         <package name="cloud-init-config-suse" />
     </packages>
 
-    <packages type="image" profiles="kvm,OpenStack-Cloud">
+    <packages type="image" profiles="kvm,kvm-firstboot,OpenStack-Cloud">
         <package name="kernel-default-base"/>
     </packages>
 
