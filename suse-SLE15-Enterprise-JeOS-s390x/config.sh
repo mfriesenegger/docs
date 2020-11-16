@@ -188,6 +188,25 @@ if [[ "$kiwi_profiles" == *"RaspberryPi"* ]]; then
 	EOF
 fi
 
+if [[ "$kiwi_profiles" == *"kvm"* ]]; then
+	#=================================================
+	# Fix efivars in /usr/lib/jeos-firstboot for s390x
+	#-------------------------------------------------
+	sed -i '/^run modprobe efivars$/i if modinfo efivars > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
+	sed -i '/^run modprobe efivars$/a fi' /usr/lib/jeos-firstboot
+	sed -i '/^run modprobe efivars$/c \\trun modprobe efivars' /usr/lib/jeos-firstboot
+
+	#=========================================================================
+	# Do not run setterm in /usr/lib/jeos-firstboot if not available for s390x
+	#-------------------------------------------------------------------------
+	sed -i '/\trun setterm -msg on/i \\tif type -p seterm > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
+	sed -i '/\trun setterm -msg on/a \\tfi' /usr/lib/jeos-firstboot
+	sed -i '/\trun setterm -msg/ s/run setterm -msg on/\trun setterm -msg on/' /usr/lib/jeos-firstboot
+	sed -i '/^run setterm -msg off$/i if type -p seterm > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
+	sed -i '/^run setterm -msg off$/a fi' /usr/lib/jeos-firstboot
+	sed -i '/^run setterm -msg off$/c \\trun setterm -msg off' /usr/lib/jeos-firstboot
+fi
+
 ##
 baseCleanMount
 
