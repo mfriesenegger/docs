@@ -3,7 +3,7 @@
 The intent is to document building kiwi images for multiple deployment options.
 
 - SLES KVM qcow2 JeOS images
-- SLES JeOS images for ECKD and FCP (z/VM and LPAR)
+- SLES JeOS images for ECKD, FBA(EDEV) and FCP(SCSI) for z/VM and LPAR
 
 The scope of this document is open ended to included info on:
 
@@ -112,9 +112,23 @@ ssh=1 sshpassword=suserocks rescue=1
 - The following command simplifies the deployment of the bootable image file.  The script must be copied from docs-private/bin to /root/bin. The target Z system where the image will be deployed must be booted into rescue mode with the target DASD enabled.  The command requires two parameters. The command will show additional usage details if any of the required parameters are missing.
   - The first parameter is the path to the bootable raw file.
   - The second parameter is the IP address of the guest the image will be deployed.
+  - The third parmeter is sector size which is optional and either 512 or 4096. The default is 512 if nothing is specified.
 
 ```
-deploy-oem-dasd-image.sh /tmp/kiwi-15sp2-dasd-xfs/SLES15-SP2-JeOS.s390x-15.2.raw 10.161.128.6
+deploy-oem-image.sh /tmp/kiwi-15sp2-dasd-xfs/SLES15-SP2-JeOS.s390x-15.2.raw 10.161.128.6 4096
 ```
 
 - Once the image is deployed, shutdown the Z system running rescue mode and IPL the boot device to confirm that the deployed image boots properly.
+
+## Build a SLES JeOS oem fba edev image
+
+The steps in this section build on the information presented in the previous section.
+
+The biggest difference between this section and the dasd eckd image section is the profile used for the kiwi image definition.  Once the fba image is built, it will be deployed in a similar method like the dasd eckd image.
+
+Be aware of the following items when building and deploying a fba image:
+
+- Be sure to pull the latest from this github project.
+- The kiwi profile to use is named **oem-fba**.
+- Use the kiwi-ng command examples from previous sections to build this image.
+- Specify 512 or do not specify the third option when using deploy-oem-image.sh to deploy an image.

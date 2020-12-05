@@ -11,8 +11,9 @@
     <profiles>
         <profile name="kvm" description="JeOS for KVM" arch="s390x"/>
         <profile name="kvm-firstboot" description="JeOS for KVM with firstboot" arch="s390x"/>
-	      <profile name="OpenStack-Cloud" description="JeOS for OpenStack Cloud" arch="s390x"/>
+        <profile name="OpenStack-Cloud" description="JeOS for OpenStack Cloud" arch="s390x"/>
         <profile name="oem-dasd" description="JeOS for DASD" arch="s390x"/>
+        <profile name="oem-fba" description="JeOS for FBA EDEV" arch="s390x"/>
     </profiles>
 
     <preferences profiles="kvm,kvm-firstboot,OpenStack-Cloud">
@@ -67,8 +68,34 @@
       </type>
     </preferences>
 
+    <preferences profiles="oem-fba">
+        <version>15.2</version>
+        <packagemanager>zypper</packagemanager>
+        <bootsplash-theme>SLE</bootsplash-theme>
+        <bootloader-theme>SLE</bootloader-theme>
+    <!-- those settings are applied by suseConfig in config.sh
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <hwclock>utc</hwclock>
+    -->
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <type
+          image="oem"
+          filesystem="xfs"
+          initrd_system="dracut"
+          bootloader="grub2_s390x_emu"
+          bootloader_console="serial"
+          kernelcmdline="dasd_mod.dasd=ipldev "
+          zipl_targettype="FBA"
+          devicepersistency="by-path"
+     >
+             <size unit="M">1536</size>
+      </type>
+    </preferences>
+
     <!-- Only needed for images without cloud-init -->
-    <users profiles="kvm,oem-dasd">
+    <users profiles="kvm,oem-dasd,oem-fba">
         <user name="root" home="/root" pwdformat="plain" password="root" groups="root" />
     </users>
 
@@ -145,7 +172,7 @@ Use the following command on a registered SLES15 SP2 manually installed system t
         <package name="kernel-default-base"/>
     </packages>
 
-    <packages type="image" profiles="oem-dasd">
+    <packages type="image" profiles="oem-dasd,oem-fba">
         <package name="dracut-kiwi-oem-repart" />
         <package name="kernel-default"/>
     </packages>
