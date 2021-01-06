@@ -13,6 +13,7 @@
         <profile name="kvm-firstboot" description="JeOS for KVM with firstboot" arch="s390x"/>
         <profile name="OpenStack-Cloud" description="JeOS for OpenStack Cloud" arch="s390x"/>
         <profile name="oem-dasd" description="JeOS for DASD" arch="s390x"/>
+        <profile name="oem-dasd-btrfs" description="JeOS on btrfs for DASD" arch="s390x"/>
         <profile name="oem-fba" description="JeOS for FBA EDEV" arch="s390x"/>
     </profiles>
 
@@ -68,6 +69,48 @@
         </type>
     </preferences>
 
+    <preferences profiles="oem-dasd-btrfs">
+        <version>12.5</version>
+        <packagemanager>zypper</packagemanager>
+        <bootsplash-theme>SLE</bootsplash-theme>
+        <bootloader-theme>SLE</bootloader-theme>
+    <!-- those settings are applied by suseConfig in config.sh
+        <locale>en_US</locale>
+        <keytable>us.map.gz</keytable>
+        <timezone>Europe/Berlin</timezone>
+        <hwclock>utc</hwclock>
+    -->
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <type
+            image="oem"
+            filesystem="btrfs"
+            initrd_system="dracut"
+            bootpartition="true"
+            bootpartsize="300"
+            bootfilesystem="ext2"
+            bootloader="grub2_s390x_emu"
+            bootloader_console="serial"
+            kernelcmdline="dasd_mod.dasd=ipldev "
+            zipl_targettype="CDL"
+            devicepersistency="by-path"
+            target_blocksize="4096"
+            btrfs_quota_groups="true"
+            btrfs_root_is_snapshot="true"
+       >
+              <systemdisk>
+                  <volume name="home"/>
+                  <volume name="root"/>
+                  <volume name="tmp"/>
+                  <volume name="opt"/>
+                  <volume name="srv"/>
+                  <volume name="boot/grub2/s390x-emu"/>
+                  <volume name="usr/local"/>
+                  <volume name="var" copy_on_write="false"/>
+               </systemdisk>
+               <size unit="M">1536</size>
+        </type>
+    </preferences>
+
     <preferences profiles="oem-fba">
         <version>12.5</version>
         <packagemanager>zypper</packagemanager>
@@ -95,7 +138,7 @@
     </preferences>
 
     <!-- Only needed for images without cloud-init -->
-    <users profiles="kvm,kvm-firstboot,oem-dasd,oem-fba">
+    <users profiles="kvm,kvm-firstboot,oem-dasd,oem-dasd-btrfs,oem-fba">
         <user name="root" home="/root" groups="root" pwdformat="plain" password="root"/>
     </users>
 
@@ -144,7 +187,6 @@ Use the following command on a registered SLES12 SP5 manually installed system t
         <package name="salt-minion"/>
         <package name="wget"/> <!-- For SMT (bsc#1127551) -->
         <package name="ntp"/>
-        <package name="xfsprogs" />
     </packages>
 
     <packages type="image" profiles="kvm-firstboot">
@@ -160,11 +202,25 @@ Use the following command on a registered SLES12 SP5 manually installed system t
 
     <packages type="image" profiles="kvm,kvm-firstboot,OpenStack-Cloud">
         <package name="kernel-default-base"/>
+        <package name="xfsprogs" />
+    </packages>
+
+    <packages type="image" profiles="oem-dasd,oem-dasd-btrfs,oem-fba">
+        <package name="dracut-kiwi-oem-repart" />
+        <package name="kernel-default"/>
     </packages>
 
     <packages type="image" profiles="oem-dasd,oem-fba">
-        <package name="dracut-kiwi-oem-repart" />
-        <package name="kernel-default"/>
+        <package name="xfsprogs" />
+    </packages>
+
+    <packages type="image" profiles="oem-dasd-btrfs">
+        <package name="btrfsprogs"/>
+        <package name="btrfsmaintenance"/>
+        <package name="grub2-snapper-plugin"/>  <!-- snapper - grub2 - integration, "small" -->
+        <package name="snapper-zypp-plugin"/>   <!-- this is key snapper/zypp integration -->
+        <package name="rollback-helper"/>
+        <package name="snapper"/>
     </packages>
 
     <packages type="bootstrap">
