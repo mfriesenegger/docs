@@ -7,10 +7,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-# 
+#
 #======================================
 # Functions...
 #--------------------------------------
@@ -231,12 +231,14 @@ if [[ "$kiwi_profiles" == *"RaspberryPi"* ]]; then
 fi
 
 if [[ "$kiwi_profiles" == *"kvm"* ]]; then
-	#=================================================
-	# Fix efivars in /usr/lib/jeos-firstboot for s390x
-	#-------------------------------------------------
-	sed -i '/^run modprobe efivars$/i if modinfo efivars > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
-	sed -i '/^run modprobe efivars$/a fi' /usr/lib/jeos-firstboot
-	sed -i '/^run modprobe efivars$/c \\trun modprobe efivars' /usr/lib/jeos-firstboot
+  if rpm -q jeos-firstboot >/dev/null; then
+	  #=================================================
+	  # Fix efivars in /usr/lib/jeos-firstboot for s390x
+	  #-------------------------------------------------
+	  sed -i '/^run modprobe efivars$/i if modinfo efivars > /dev/null 2>&1; then' /usr/lib/jeos-firstboot
+	  sed -i '/^run modprobe efivars$/a fi' /usr/lib/jeos-firstboot
+	  sed -i '/^run modprobe efivars$/c \\trun modprobe efivars' /usr/lib/jeos-firstboot
+  fi
 fi
 
 # Not compatible with set -e
