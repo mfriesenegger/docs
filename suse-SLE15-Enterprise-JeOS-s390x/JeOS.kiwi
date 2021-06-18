@@ -36,7 +36,7 @@
             boottimeout="0"
             bootloader="grub2_s390x_emu"
             kernelcmdline="hvc_iucv=8 TERM=dumb "
-	    devicepersistency="by-path"
+	          devicepersistency="by-uuid"
 	>
 	    	<size unit="G">10</size>
 	</type>
