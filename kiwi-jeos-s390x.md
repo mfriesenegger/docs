@@ -17,10 +17,12 @@ The kiwi definitions will work for all service packs of a SLES version.  The def
 
 - http://osinside.github.io/kiwi/
 
-## Setup a KVM VM where kiwi will build images
+## Setup a VM where kiwi will build images
 
-- Install SLES15 SP2 in KVM guest
-  - Recommended on a SLES15 SP2 s390x KVM host
+**RECOMMENDATION:**  Install and use kiwi on a z/VM guest for DASD, FBA and FCP images.  Install and use kiwi builder on KVM VM for qcow2 and FCP images.  Other combinations may work but builds might fail.  An example failure is building a SLES 12 SP5 FBA image on a SLES15 SP2 KVM VM where the latest kiwi is installed will cause an image build time error.
+
+- Install SLES15 SP2 or later in VM where kiwi will be installed and run
+  - Recommended to use SLES15 SP2 s390x or newer for the KVM host
 - Register with SCC
 
   ```
@@ -28,7 +30,7 @@ The kiwi definitions will work for all service packs of a SLES version.  The def
   SUSEConnect -p sle-module-development-tools/15.2/s390x
   ```
 
-- Fully patch the SLES15 SP2 KVM guest
+- Fully patch the SLES15 SP2 VM
 - **NOTE: If kpartx-0.8.2+140.5146cae-4.3.1 is installed then replace with older kpartx-0.8.2+18.9ff73e7-2.1**
   - This latest kpartx version does not work properly recognize a 4K virtual DASD file - [bug 1139775](https://bugzilla.suse.com/show_bug.cgi?id=1139775)
 - Install kiwi
